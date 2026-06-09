@@ -1,13 +1,69 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model Employee {
+  id          Int      @id @default(autoincrement())
+  name        String
+  role        String
+  department  String
+  photoUrl    String?
+  description String   @db.Text
+  hiredAt     DateTime
+  createdAt   DateTime @default(now())
+  skills      Skill[]
+  score       Score?
+  matches     OpportunityMatch[]
+}
+
+model Skill {
+  id         Int      @id @default(autoincrement())
+  name       String
+  percentage Int
+  isHidden   Boolean  @default(false)
+  employeeId Int
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+}
+
+model Score {
+  id           Int      @id @default(autoincrement())
+  talentScore  Int
+  hiddenTalent String
+  summary      String   @db.Text
+  employeeId   Int      @unique
+  employee     Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  updatedAt    DateTime @updatedAt
+}
+
+model Opportunity {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String   @db.Text
+  department  String
+  isOpen      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  matches     OpportunityMatch[]
+}
+
+model OpportunityMatch {
+  id            Int         @id @default(autoincrement())
+  matchScore    Int
+  justification String      @db.Text
+  employeeId    Int
+  opportunityId Int
+  employee      Employee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  opportunity   Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
 }
